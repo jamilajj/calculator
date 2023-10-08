@@ -23,7 +23,7 @@ function equal()
 var exp = document.form1.textview.value;
 if(exp)
 {
-document.form1.textview.value = eval(exp)
+document.form1.textview.value = customEval(exp)
 }
 }
 
@@ -134,6 +134,88 @@ background-color: lightgreen;
 	</table>
 	</center>
  </div>
+ <script>
+function customEval(expression) {
+    // Split the expression into individual tokens
+    var tokens = expression.match(/(\d+|\+|\-|\*|\/)/g);
+
+    if (!tokens) {
+        throw new Error('Invalid expression');
+    }
+
+    var stack = [];
+    var operators = {
+        '+': 1,
+        '-': 1,
+        '*': 2,
+        '/': 2
+    };
+
+    for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+
+        if (!isNaN(token)) {
+            stack.push(parseFloat(token));
+        } else if (token in operators) {
+            while (stack.length >= 2 && operators[token] <= operators[stack[stack.length - 1]]) {
+                var b = stack.pop();
+                var a = stack.pop();
+                var op = stack.pop();
+                stack.push(applyOperator(op, a, b));
+            }
+            stack.push(token);
+        } else {
+            throw new Error('Invalid token: ' + token);
+        }
+    }
+
+    while (stack.length > 1) {
+        var b = stack.pop();
+        var a = stack.pop();
+        var op = stack.pop();
+        stack.push(applyOperator(op, a, b));
+    }
+
+    if (stack.length === 1) {
+        return stack[0];
+    } else {
+        throw new Error('Invalid expression');
+    }
+}
+
+function applyOperator(operator, a, b) {
+    switch (operator) {
+        case '+':
+            return a + b;
+        case '-':
+            return a - b;
+        case '*':
+            return a * b;
+        case '/':
+            if (b === 0) {
+                throw new Error('Division by zero');
+            }
+            return a / b;
+        default:
+            throw new Error('Invalid operator: ' + operator);
+    }
+}
+
+
+try {
+    var result = customEval("2 + 3 * 4");
+    console.log(result); // Output: 14
+} catch (error) {
+    console.error(error.message);
+}
+ </script>
+
+ 
+	
+
+ 
+
+ 
  </body>
  </html>
 
